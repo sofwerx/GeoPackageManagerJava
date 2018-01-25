@@ -42,6 +42,24 @@ public class GPkgManager {
 		if(workableFile.exists()) { //checking if the Tmp File already has information
 			workableFile.delete();
 		}
+		System.out.println("Default File loaded");
+		loadGeoPackage(originalFile);
+	}
+	GPkgManager(String fileName){
+		originalFile = new File(fileName);//defaults to example
+		workableFile = new File("res/tmp.gpkg");
+		if(!originalFile.exists()) {
+			System.out.println("File " + fileName +" does not exist");
+			closeGeoPackage();
+			isActive = false;
+		}
+
+		System.out.println("File " + fileName +" loaded");
+		
+		if(workableFile.exists()) { //checking if the Tmp File already has information
+			workableFile.delete();
+		}
+		loadGeoPackage(originalFile);
 	}
 	//This retrieves all of the Feature information from the DAO (Data Access Object)
 	//The Dao handles Abstraction between the Database and the Application Layers

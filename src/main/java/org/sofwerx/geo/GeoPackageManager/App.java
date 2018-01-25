@@ -35,9 +35,15 @@ import java.util.Scanner;
 public class App extends Frame
 {	
 	
-	public App() {  
-		GPkgManager mng = new GPkgManager();
+	public App(String fileName) {
+		GPkgManager mng;
+		if(fileName.equals("")) {
+			mng = new GPkgManager();
+		}else{
+			mng = new GPkgManager(fileName);
+		}
 		Scanner scan = new Scanner(System.in);
+		
 		//GeoPackage geoPackage = GeoPackageManager.open(new File("res/example.gpkg"));
 		//mng.retrieveGeoPackageInformation(geoPackage);
 		//mng.displayZoomLevelInfo();
@@ -48,7 +54,13 @@ public class App extends Frame
 		}
 	}
     public static void main( String[] args )
-    {
-	      new App();
+    { 
+    	String fileName = "";
+    	if(args.length>0) {
+			fileName = args[0];
+		}
+	    new App(fileName);
+	     
+			
     }
 }
