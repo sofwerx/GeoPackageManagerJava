@@ -1,4 +1,4 @@
-package sof.works.intern.GeoPackageManager;
+package org.sofwerx.geo.GeoPackageManager;
 
 import sof.works.intern.GeoPackageManager.*;
 

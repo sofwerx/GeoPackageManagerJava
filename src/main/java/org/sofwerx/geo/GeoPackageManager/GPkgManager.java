@@ -1,4 +1,4 @@
-package sof.works.intern.GeoPackageManager;
+package org.sofwerx.geo.GeoPackageManager;
 
 import java.io.File;
 import java.io.IOException;
