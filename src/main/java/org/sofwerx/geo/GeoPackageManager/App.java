@@ -38,9 +38,9 @@ public class App extends Frame
 	public App() {  
 		GPkgManager mng = new GPkgManager();
 		Scanner scan = new Scanner(System.in);
-		GeoPackage geoPackage = GeoPackageManager.open(new File("res/example.gpkg"));
-		mng.retrieveGeoPackageInformation(geoPackage);
-		mng.displayZoomLevelInfo();
+		//GeoPackage geoPackage = GeoPackageManager.open(new File("res/example.gpkg"));
+		//mng.retrieveGeoPackageInformation(geoPackage);
+		//mng.displayZoomLevelInfo();
 		while(mng.isActive()) {	
 			System.out.print("Input ('help' for List): ");
 			String input = scan.nextLine();
