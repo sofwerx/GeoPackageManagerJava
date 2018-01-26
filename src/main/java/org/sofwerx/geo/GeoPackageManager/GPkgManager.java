@@ -152,7 +152,7 @@ public class GPkgManager {
 	 * @param 
 	 * @return This Method Displays the Information contained in the FeatureDao and TileDao and Separates them by Zoom Levels
 	 */
-	private void displayZoomLevelInfo() {//HashMap<Integer,HashMap<FeatureDao,Boolean>> featureZoomLevels
+	public void displayZoomLevelInfo() {//HashMap<Integer,HashMap<FeatureDao,Boolean>> featureZoomLevels
 
 		System.out.println("Feature Layers:");
 		for (Integer key : featureZoomLevels.keySet()) {

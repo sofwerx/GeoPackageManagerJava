@@ -76,12 +76,20 @@ public class App extends JPanel implements ActionListener
             	  JPanel ZoomLayerDetails = new JPanel();
             	  ZoomLayerPanel.add(ZoomLayerLabel);
             	  ZoomLayerDetails.setLayout(new BoxLayout(ZoomLayerDetails, BoxLayout.Y_AXIS));
-            	  HashMap<FeatureDao,Boolean> featureMap = features.get(retrieveKeys);
-            	  for(FeatureDao fDao : featureMap.keySet()) {
+            	  final HashMap<FeatureDao,Boolean> featureMap = features.get(retrieveKeys);
+            	  for(final FeatureDao fDao : featureMap.keySet()) {
 	                  final JCheckBox chkBox = new JCheckBox(fDao.getGeometryColumnName());
 	                  chkBox.setSelected(featureMap.get(fDao));
+	                  chkBox.addItemListener(new ItemListener() {
+	                      @Override
+	                      public void itemStateChanged(ItemEvent e) {
+	                    	  System.out.println(fDao.toString() + " Switched");
+	                          featureMap.put(fDao, e.getStateChange()==ItemEvent.SELECTED);
+	                          //mng.displayZoomLevelInfo(); //Just for Debugging
+	                      }
+	                  });
+
 	                  ZoomLayerDetails.add(chkBox);
-	                  
             	  }
             	  ZoomLayerPanel.add(ZoomLayerDetails);
             	  editor.add(ZoomLayerPanel);
