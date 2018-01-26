@@ -50,6 +50,7 @@ public class GPkgManager {
 		workableFile = new File("res/tmp.gpkg");
 		if(!originalFile.exists()) {
 			System.out.println("File " + fileName +" does not exist");
+			System.exit(0);
 			closeGeoPackage();
 			isActive = false;
 		}
@@ -61,6 +62,17 @@ public class GPkgManager {
 		}
 		loadGeoPackage(originalFile);
 	}
+	
+	/**
+	 * This will retrive the Daos for the GUI to Visualize
+	 */
+	public HashMap<Integer,HashMap<FeatureDao,Boolean>> getFeatures(){
+		return featureZoomLevels;
+	}
+	public HashMap<Integer,HashMap<TileDao,Boolean>> getTiles(){
+		return tileZoomLevels;
+	}
+	
 	//This retrieves all of the Feature information from the DAO (Data Access Object)
 	//The Dao handles Abstraction between the Database and the Application Layers
 	//There are other Attributes that can be Gathered from the Dao like Bounding Box, and Spatial Reference Systems (SRS)
@@ -221,8 +233,10 @@ public class GPkgManager {
 	 * @param File, the name of the file to be loaded
 	 * @return True if the Geopackage was loaded and copied, False if otherwise.
 	 */
-	private boolean loadGeoPackage(File file) {
-		GeoPackageManager.create(workableFile);
+	public boolean loadGeoPackage(File file) {
+		if(workableFile.exists()) {
+			workableFile.delete();
+		}
 		try {
 			GeoPackageIOUtils.copyFile(originalFile,workableFile );
 			this.geoPackage =  GeoPackageManager.open(workableFile);
@@ -256,10 +270,14 @@ public class GPkgManager {
 	private boolean SaveInterface() {
 		System.out.print("What is the Name of you File (e.g. MyMap): ");
 		String fileName = scan.nextLine();
-		GeoPackageManager.create(new File("res/"+fileName+".gpkg"));
+		File newFile= new File("res/"+fileName+".gpkg");
+		GeoPackageManager.create(newFile);
+		
 		//GeoPackage newGeoPackage = GeoPackageManager.open(new File("res/"+fileName+".gpkg"));
+		GeoPackage newGeoPackage = GeoPackageManager.open(newFile);
+		//newGeoPackage.createTileTable();
 		try {
-			GeoPackageIOUtils.copyFile(workableFile,new File("res/"+fileName+".gpkg") );
+			GeoPackageIOUtils.copyFile(workableFile,newFile);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
