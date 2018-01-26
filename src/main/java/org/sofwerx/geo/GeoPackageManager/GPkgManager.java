@@ -247,6 +247,23 @@ public class GPkgManager {
 		}
 		return true;
 	}
+
+	/**
+	 * This will copy the Geopackage from a file and load it into a temporary geopackage. It will then save back into a geopackage when it's finished and delete the temporary geopackage
+	 * @param File, the name of the file to be saved
+	 * @return True if the Geopackage was saved, False if otherwise.
+	 */
+	public boolean saveGeoPackage(File newFile) {
+		try {
+			GeoPackageIOUtils.copyFile(workableFile,newFile );
+			this.geoPackage =  GeoPackageManager.open(workableFile);
+			retrieveGeoPackageInformation();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			return false;
+		}
+		return true;
+	}
 	/**
 	 * This will save and close the Geopackage from a file. It deletes the temporary geopackage
 	 * @param 

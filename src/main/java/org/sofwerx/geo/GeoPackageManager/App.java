@@ -46,6 +46,65 @@ public class App extends JPanel implements ActionListener
 	GPkgManager mng;
     JTextField input;
     private static String ENTER = "Enter";
+
+    public void getFeaturePanels(HashMap<Integer,HashMap<FeatureDao,Boolean>> features){
+
+  	  SortedSet<Integer> keys = new TreeSet<Integer>(features.keySet());
+        for(Integer retrieveKeys: keys) {
+      	  JPanel ZoomLayerPanel = new JPanel();
+      	  JLabel ZoomLayerLabel = new JLabel("Zoom Layer: " + retrieveKeys.toString());
+      	  JPanel ZoomLayerDetails = new JPanel();
+      	  ZoomLayerPanel.add(ZoomLayerLabel);
+      	  ZoomLayerDetails.setLayout(new BoxLayout(ZoomLayerDetails, BoxLayout.Y_AXIS));
+      	  final HashMap<FeatureDao,Boolean> featureMap = features.get(retrieveKeys);
+      	  for(final FeatureDao fDao : featureMap.keySet()) {
+                final JCheckBox chkBox = new JCheckBox(fDao.getGeometryColumnName());
+                chkBox.setSelected(featureMap.get(fDao));
+                chkBox.addItemListener(new ItemListener() {
+                    @Override
+                    public void itemStateChanged(ItemEvent e) {
+                  	  //System.out.println(fDao.toString() + " Switched");
+                        featureMap.put(fDao, e.getStateChange()==ItemEvent.SELECTED);
+                        //mng.displayZoomLevelInfo(); //Just for Debugging
+                    }
+                });
+
+                ZoomLayerDetails.add(chkBox);
+      	  }
+      	  ZoomLayerPanel.add(ZoomLayerDetails);
+      	  editor.add(ZoomLayerPanel);
+        }
+    }
+
+    public void getTilePanels(HashMap<Integer,HashMap<TileDao,Boolean>> features){
+
+  	  SortedSet<Integer> keys = new TreeSet<Integer>(features.keySet());
+        for(Integer retrieveKeys: keys) {
+      	  JPanel ZoomLayerPanel = new JPanel();
+      	  JLabel ZoomLayerLabel = new JLabel("Zoom Layer: " + retrieveKeys.toString());
+      	  JPanel ZoomLayerDetails = new JPanel();
+      	  ZoomLayerPanel.add(ZoomLayerLabel);
+      	  ZoomLayerDetails.setLayout(new BoxLayout(ZoomLayerDetails, BoxLayout.Y_AXIS));
+      	  final HashMap<TileDao,Boolean> featureMap = features.get(retrieveKeys);
+      	  for(final TileDao fDao : featureMap.keySet()) {
+                final JCheckBox chkBox = new JCheckBox(fDao.getTableName());
+                chkBox.setSelected(featureMap.get(fDao));
+                chkBox.addItemListener(new ItemListener() {
+                    @Override
+                    public void itemStateChanged(ItemEvent e) {
+                  	  //System.out.println(fDao.toString() + " Switched");
+                        featureMap.put(fDao, e.getStateChange()==ItemEvent.SELECTED);
+                        //mng.displayZoomLevelInfo(); //Just for Debugging
+                    }
+                });
+
+                ZoomLayerDetails.add(chkBox);
+      	  }
+      	  ZoomLayerPanel.add(ZoomLayerDetails);
+      	  editor.add(ZoomLayerPanel);
+        }
+    }
+    
 	public void drawWindow(){
 		//Drawing the Log and the Text Input for console Commands
         //Create the log first, because the action listeners
@@ -64,37 +123,11 @@ public class App extends JPanel implements ActionListener
         fc = new JFileChooser();
         fc.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                //System.out.println(e.getSource());
+                //System.out.println(openButton);
+                //System.out.println(saveButton);
               //System.out.println(fc.getSelectedFile().getPath());
-              mng.loadGeoPackage(fc.getSelectedFile());
-              HashMap<Integer,HashMap<FeatureDao,Boolean>> features = mng.getFeatures();
-              HashMap<Integer,HashMap<TileDao,Boolean>> tiles = mng.getTiles();
-              editor.removeAll();
-        	  SortedSet<Integer> keys = new TreeSet<Integer>(features.keySet());
-              for(Integer retrieveKeys: keys) {
-            	  JPanel ZoomLayerPanel = new JPanel();
-            	  JLabel ZoomLayerLabel = new JLabel("Zoom Layer: " + retrieveKeys.toString());
-            	  JPanel ZoomLayerDetails = new JPanel();
-            	  ZoomLayerPanel.add(ZoomLayerLabel);
-            	  ZoomLayerDetails.setLayout(new BoxLayout(ZoomLayerDetails, BoxLayout.Y_AXIS));
-            	  final HashMap<FeatureDao,Boolean> featureMap = features.get(retrieveKeys);
-            	  for(final FeatureDao fDao : featureMap.keySet()) {
-	                  final JCheckBox chkBox = new JCheckBox(fDao.getGeometryColumnName());
-	                  chkBox.setSelected(featureMap.get(fDao));
-	                  chkBox.addItemListener(new ItemListener() {
-	                      @Override
-	                      public void itemStateChanged(ItemEvent e) {
-	                    	  System.out.println(fDao.toString() + " Switched");
-	                          featureMap.put(fDao, e.getStateChange()==ItemEvent.SELECTED);
-	                          //mng.displayZoomLevelInfo(); //Just for Debugging
-	                      }
-	                  });
-
-	                  ZoomLayerDetails.add(chkBox);
-            	  }
-            	  ZoomLayerPanel.add(ZoomLayerDetails);
-            	  editor.add(ZoomLayerPanel);
-            	  revalidate();
-              }
+              
             }
           });
 
@@ -164,9 +197,16 @@ public class App extends JPanel implements ActionListener
             int returnVal = fc.showOpenDialog(App.this);
 
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
-                //This is where a real application would open the file.
-                log.append("Opening: " + file.getName() + "." + "\n");
+                log.append("Opening: " + fc.getSelectedFile().getName() + "." + "\n");
+                mng.loadGeoPackage(fc.getSelectedFile());
+                HashMap<Integer,HashMap<FeatureDao,Boolean>> features = mng.getFeatures();
+                HashMap<Integer,HashMap<TileDao,Boolean>> tiles = mng.getTiles();
+                editor.removeAll();
+                editor.add(new Label("GeoPackage Features"),BorderLayout.CENTER);
+                getFeaturePanels(features);
+                editor.add(new Label("GeoPackage Tiles"),BorderLayout.NORTH);
+                getTilePanels(tiles);
+                revalidate();
             } else {
                 log.append("Open command cancelled by user." + "\n");
             }
@@ -177,7 +217,7 @@ public class App extends JPanel implements ActionListener
             int returnVal = fc.showSaveDialog(App.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
-                //This is where a real application would save the file.
+                mng.saveGeoPackage(fc.getSelectedFile());
                 log.append("Saving: " + file.getName() + "." + "\n");
             } else {
                 log.append("Save command cancelled by user." + "\n");
