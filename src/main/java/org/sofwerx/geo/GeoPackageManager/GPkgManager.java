@@ -81,7 +81,7 @@ public class GPkgManager {
 	 * @param featureDao
 	 * @return A Hashmap of Information about the Feature that you passed, By Default, it passes ID, Name, and the Size in Bytes of the Geometries
 	 */
-	private HashMap<String,Object> getFeatureDaoInfo(FeatureDao featureDao){
+	public HashMap<String,Object> getFeatureDaoInfo(FeatureDao featureDao){
 		HashMap<String,Object> retMap = new HashMap<>();
         FeatureResultSet featureCursor = featureDao.queryForAll();
         int geometrySize = 0;
@@ -107,7 +107,7 @@ public class GPkgManager {
 	 * @param tileDao
 	 * @return A Hashmap of Information about the Tile that you passed, By Default, it passes ID, Name, and the Size in Bytes of the Geometries
 	 */
-	private HashMap<String,Object> getTileDaoInfo(TileDao tileDao){
+	public HashMap<String,Object> getTileDaoInfo(TileDao tileDao){
 		HashMap<String,Object> retMap = new HashMap<>();
         TileResultSet featureCursor = tileDao.queryForAll();
         int geometrySize = 0;

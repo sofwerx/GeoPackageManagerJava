@@ -51,14 +51,22 @@ public class App extends JPanel implements ActionListener
 
   	  SortedSet<Integer> keys = new TreeSet<Integer>(features.keySet());
         for(Integer retrieveKeys: keys) {
-      	  JPanel ZoomLayerPanel = new JPanel();
+    	  JPanel ZoomLayerPanel = new JPanel();
+      	  JPanel ZoomLayerInfoPanel = new JPanel();
       	  JLabel ZoomLayerLabel = new JLabel("Zoom Layer: " + retrieveKeys.toString());
       	  JPanel ZoomLayerDetails = new JPanel();
-      	  ZoomLayerPanel.add(ZoomLayerLabel);
+      	  ZoomLayerInfoPanel.setLayout(new BoxLayout(ZoomLayerInfoPanel, BoxLayout.Y_AXIS));
       	  ZoomLayerDetails.setLayout(new BoxLayout(ZoomLayerDetails, BoxLayout.Y_AXIS));
       	  final HashMap<FeatureDao,Boolean> featureMap = features.get(retrieveKeys);
+      	  int layerSize = 0;
       	  for(final FeatureDao fDao : featureMap.keySet()) {
-                final JCheckBox chkBox = new JCheckBox(fDao.getGeometryColumnName());
+
+      		  
+	    		HashMap<String, Object> info = mng.getFeatureDaoInfo(fDao);
+	    		if((featureMap.get(fDao))) {
+	  	    		layerSize += (Integer)info.get("Size");
+	  	    	}
+                final JCheckBox chkBox = new JCheckBox(fDao.getTableName() + " ("+ GeoPackageIOUtils.formatBytes((Integer)info.get("Size")) +")");
                 chkBox.setSelected(featureMap.get(fDao));
                 chkBox.addItemListener(new ItemListener() {
                     @Override
@@ -66,11 +74,16 @@ public class App extends JPanel implements ActionListener
                   	  //System.out.println(fDao.toString() + " Switched");
                         featureMap.put(fDao, e.getStateChange()==ItemEvent.SELECTED);
                         //mng.displayZoomLevelInfo(); //Just for Debugging
+                        refreshInfo();
                     }
                 });
 
                 ZoomLayerDetails.add(chkBox);
       	  }
+
+      	  ZoomLayerInfoPanel.add(ZoomLayerLabel);
+          ZoomLayerInfoPanel.add(new JLabel("Size: " + GeoPackageIOUtils.formatBytes(layerSize)));
+      	  ZoomLayerPanel.add(ZoomLayerInfoPanel);
       	  ZoomLayerPanel.add(ZoomLayerDetails);
       	  editor.add(ZoomLayerPanel);
         }
@@ -81,30 +94,51 @@ public class App extends JPanel implements ActionListener
   	  SortedSet<Integer> keys = new TreeSet<Integer>(features.keySet());
         for(Integer retrieveKeys: keys) {
       	  JPanel ZoomLayerPanel = new JPanel();
+      	  JPanel ZoomLayerInfoPanel = new JPanel();
       	  JLabel ZoomLayerLabel = new JLabel("Zoom Layer: " + retrieveKeys.toString());
       	  JPanel ZoomLayerDetails = new JPanel();
+      	  ZoomLayerInfoPanel.setLayout(new BoxLayout(ZoomLayerInfoPanel, BoxLayout.Y_AXIS));
       	  ZoomLayerPanel.add(ZoomLayerLabel);
       	  ZoomLayerDetails.setLayout(new BoxLayout(ZoomLayerDetails, BoxLayout.Y_AXIS));
       	  final HashMap<TileDao,Boolean> featureMap = features.get(retrieveKeys);
+      	  int layerSize = 0;
       	  for(final TileDao fDao : featureMap.keySet()) {
-                final JCheckBox chkBox = new JCheckBox(fDao.getTableName());
-                chkBox.setSelected(featureMap.get(fDao));
-                chkBox.addItemListener(new ItemListener() {
-                    @Override
-                    public void itemStateChanged(ItemEvent e) {
-                  	  //System.out.println(fDao.toString() + " Switched");
-                        featureMap.put(fDao, e.getStateChange()==ItemEvent.SELECTED);
-                        //mng.displayZoomLevelInfo(); //Just for Debugging
-                    }
-                });
-
-                ZoomLayerDetails.add(chkBox);
+				HashMap<String, Object> info = mng.getTileDaoInfo(fDao);
+				if((featureMap.get(fDao))) {
+					layerSize += (Integer)info.get("Size");
+				}
+				final JCheckBox chkBox = new JCheckBox(fDao.getTableName() + " ("+ GeoPackageIOUtils.formatBytes((Integer)info.get("Size")) +")");
+				chkBox.setSelected(featureMap.get(fDao));
+				chkBox.addItemListener(new ItemListener() {
+				    @Override
+				    public void itemStateChanged(ItemEvent e) {
+				  	  //System.out.println(fDao.toString() + " Switched");
+				        featureMap.put(fDao, e.getStateChange()==ItemEvent.SELECTED);
+				        //mng.displayZoomLevelInfo(); //Just for Debugging
+				        refreshInfo();
+				    }
+				});
+				
+				ZoomLayerDetails.add(chkBox);
       	  }
+      	  ZoomLayerInfoPanel.add(ZoomLayerLabel);
+          ZoomLayerInfoPanel.add(new JLabel("Size: " + GeoPackageIOUtils.formatBytes(layerSize)));
+      	  ZoomLayerPanel.add(ZoomLayerInfoPanel);
       	  ZoomLayerPanel.add(ZoomLayerDetails);
       	  editor.add(ZoomLayerPanel);
         }
     }
     
+    public void refreshInfo (){
+    	HashMap<Integer,HashMap<FeatureDao,Boolean>> features = mng.getFeatures();
+        HashMap<Integer,HashMap<TileDao,Boolean>> tiles = mng.getTiles();
+        editor.removeAll();
+        editor.add(new Label("GeoPackage Features"),BorderLayout.CENTER);
+        getFeaturePanels(features);
+        editor.add(new Label("GeoPackage Tiles"),BorderLayout.NORTH);
+        getTilePanels(tiles);
+        revalidate();
+    }
 	public void drawWindow(){
 		//Drawing the Log and the Text Input for console Commands
         //Create the log first, because the action listeners
@@ -164,6 +198,7 @@ public class App extends JPanel implements ActionListener
         editor.setLayout(new BoxLayout(editor, BoxLayout.Y_AXIS));
         //Add the buttons and the log to this panel.
         add(buttonPanel, BorderLayout.PAGE_START);
+        JScrollPane scrolling = new JScrollPane();//Need to add Scrolling to View
         add(editor, BorderLayout.CENTER);
         add(logScrollPane, BorderLayout.PAGE_END);
 	}
@@ -199,13 +234,7 @@ public class App extends JPanel implements ActionListener
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 log.append("Opening: " + fc.getSelectedFile().getName() + "." + "\n");
                 mng.loadGeoPackage(fc.getSelectedFile());
-                HashMap<Integer,HashMap<FeatureDao,Boolean>> features = mng.getFeatures();
-                HashMap<Integer,HashMap<TileDao,Boolean>> tiles = mng.getTiles();
-                editor.removeAll();
-                editor.add(new Label("GeoPackage Features"),BorderLayout.CENTER);
-                getFeaturePanels(features);
-                editor.add(new Label("GeoPackage Tiles"),BorderLayout.NORTH);
-                getTilePanels(tiles);
+                refreshInfo();
                 revalidate();
             } else {
                 log.append("Open command cancelled by user." + "\n");
