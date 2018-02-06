@@ -3,13 +3,15 @@ package org.sofwerx.geo.GeoPackageManager;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+ 
 import mil.nga.geopackage.GeoPackage;
 import mil.nga.geopackage.GeoPackageCore;
 import mil.nga.geopackage.features.columns.GeometryColumns;
@@ -26,6 +28,7 @@ import mil.nga.geopackage.tiles.user.TileRow;
 import mil.nga.wkb.geom.Geometry;
 
 import java.util.Scanner; 
+import mil.nga.geopackage.db.SQLUtils;
 
 public class GPkgManager {
 	GeoPackage geoPackage; //All Feature Table Names
@@ -234,6 +237,7 @@ public class GPkgManager {
 	 * @return True if the Geopackage was loaded and copied, False if otherwise.
 	 */
 	public boolean loadGeoPackage(File file) {
+		originalFile = file;
 		if(workableFile.exists()) {
 			workableFile.delete();
 		}
@@ -254,11 +258,26 @@ public class GPkgManager {
 	 * @return True if the Geopackage was saved, False if otherwise.
 	 */
 	public boolean saveGeoPackage(File newFile) {
+		saveEdits();
+        Connection conn = null;
 		try {
 			GeoPackageIOUtils.copyFile(workableFile,newFile );
+			GeoPackage newGPKG = GeoPackageManager.open(newFile);
+			String url = "jdbc:sqlite:"+newFile.getAbsolutePath();
 			this.geoPackage =  GeoPackageManager.open(workableFile);
+			geoPackage.getDatabase();
 			retrieveGeoPackageInformation();
+	            // create a connection to the database
+	        conn = DriverManager.getConnection(url);
+			SQLUtils.execSQL(conn ,"VACUUM");//newGPKG.getDatabase()
+			 if (conn != null) {
+                 conn.close();
+             }
+			
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			return false;
+		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			return false;
 		}
@@ -292,7 +311,9 @@ public class GPkgManager {
 		
 		//GeoPackage newGeoPackage = GeoPackageManager.open(new File("res/"+fileName+".gpkg"));
 		GeoPackage newGeoPackage = GeoPackageManager.open(newFile);
+		//SQLUtils sqlUtil = new SQLUtils();
 		//newGeoPackage.createTileTable();
+		
 		try {
 			GeoPackageIOUtils.copyFile(workableFile,newFile);
 		} catch (IOException e) {

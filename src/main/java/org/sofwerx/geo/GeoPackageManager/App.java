@@ -2,6 +2,7 @@ package org.sofwerx.geo.GeoPackageManager;
 
 import sof.works.intern.GeoPackageManager.*;
 
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +34,17 @@ import mil.nga.geopackage.tiles.user.TileResultSet;
 import mil.nga.geopackage.tiles.user.TileRow;
 import mil.nga.wkb.geom.Geometry;
 import java.util.Scanner; 
+
+//import org.geotools.data.FileDataStore;
+import org.geotools.data.FileDataStoreFinder;
+import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.map.FeatureLayer;
+import org.geotools.map.Layer;
+import org.geotools.map.MapContent;
+//import org.geotools.styling.SLD;
+//import org.geotools.styling.Style;
+import org.geotools.swing.JMapFrame;
+import org.geotools.swing.data.JFileDataStoreChooser;
 /**
  * This is an App to render and Manage Geopackages.
  * Extra Functionality may be included to download GPkgs and maybe to create custom GPkgs
@@ -198,8 +210,8 @@ public class App extends JPanel implements ActionListener
         editor.setLayout(new BoxLayout(editor, BoxLayout.Y_AXIS));
         //Add the buttons and the log to this panel.
         add(buttonPanel, BorderLayout.PAGE_START);
-        JScrollPane scrolling = new JScrollPane();//Need to add Scrolling to View
-        add(editor, BorderLayout.CENTER);
+        JScrollPane scrolling = new JScrollPane(editor);//Need to add Scrolling to View
+        add(scrolling, BorderLayout.CENTER);
         add(logScrollPane, BorderLayout.PAGE_END);
 	}
 	public App() {
