@@ -100,7 +100,6 @@ public class GPkgManager {
             }
         } finally {
             featureCursor.close();
-           
         }
 
         retMap.put("Size",geometrySize);
@@ -258,7 +257,7 @@ public class GPkgManager {
 	 * @return True if the Geopackage was saved, False if otherwise.
 	 */
 	public boolean saveGeoPackage(File newFile) {
-		saveEdits();
+		//saveEdits();
         Connection conn = null;
 		try {
 			GeoPackageIOUtils.copyFile(workableFile,newFile );
@@ -272,8 +271,7 @@ public class GPkgManager {
 			SQLUtils.execSQL(conn ,"VACUUM");//newGPKG.getDatabase()
 			 if (conn != null) {
                  conn.close();
-             }
-			
+             }	
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			return false;
@@ -290,9 +288,9 @@ public class GPkgManager {
 	 */
 	private boolean closeGeoPackage() {
 		try {
-			GeoPackageIOUtils.copyFile(workableFile,originalFile);
+			//GeoPackageIOUtils.copyFile(workableFile,originalFile);
 			workableFile.delete();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			return false;
 		}
@@ -329,7 +327,8 @@ public class GPkgManager {
 	private boolean LoadInterface() {
 		System.out.print("What is the Name of your Geopackage(e.g. example.gpkg): ");
 		String fileName = scan.nextLine();
-		if(loadGeoPackage(new File(fileName))) {
+		originalFile = new File(fileName);
+		if(loadGeoPackage(originalFile)) {
 			System.out.println("GeoPackage Loaded");
 		}else {
 			return false;
